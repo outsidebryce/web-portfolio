@@ -1,3 +1,102 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+/* Dark mode styles */
+.dark {
+    @apply bg-[#141414];
+    @apply text-gray-100;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-white;
+}
+
+.dark .bg-white {
+    @apply bg-[#141414];
+}
+
+.dark .text-gray-900 {
+    @apply text-gray-100;
+}
+
+.dark .text-gray-600 {
+    @apply text-gray-400;
+}
+
+.dark .hover\:bg-gray-50:hover {
+    @apply hover:bg-gray-700;
+}
+
+/* Custom animations */
+@layer components {
+    /* Base transitions */
+    .overlay-background,
+    .overlay-content {
+        transition: all 300ms ease-in-out;
+    }
+
+    /* Fade animations for background */
+    .fade-in {
+        opacity: 0;
+        animation: fadeIn 300ms ease-in-out forwards;
+    }
+
+    .fade-out {
+        opacity: 1;
+        animation: fadeOut 300ms ease-in-out forwards;
+    }
+
+    /* Desktop slide animations (right side) */
+    .slide-in-right {
+        transform: translateX(100%);
+        animation: slideInRight 300ms ease-in-out forwards;
+    }
+
+    .slide-out-right {
+        transform: translateX(0);
+        animation: slideOutRight 300ms ease-in-out forwards;
+    }
+
+    /* Mobile slide animations (bottom) */
+    .slide-in-bottom {
+        transform: translateY(100%);
+        animation: slideInBottom 300ms ease-in-out forwards;
+    }
+
+    .slide-out-bottom {
+        transform: translateY(0);
+        animation: slideOutBottom 300ms ease-in-out forwards;
+    }
+
+    /* Keyframes */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @keyframes slideInRight {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+
+    @keyframes slideOutRight {
+        from { transform: translateX(0); }
+        to { transform: translateX(100%); }
+    }
+
+    @keyframes slideInBottom {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+
+    @keyframes slideOutBottom {
+        from { transform: translateY(0); }
+        to { transform: translateY(100%); }
+    }
+} 

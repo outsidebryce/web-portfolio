@@ -6,8 +6,8 @@
     <title>{% block title %}Portfolio{% endblock %}</title>
     
     <!-- Preload critical fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@500&display=swap" as="style">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@500&display=swap">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@400&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@400&display=swap">
     
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
     
@@ -30,7 +30,19 @@
 </head>
 <body class="bg-white text-gray-900">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {% block content %}{% endblock %}
+        <div class="relative">
+            <button id="theme-toggle" class="absolute right-0 top-0 p-2 text-gray-500 dark:text-gray-400">
+                <!-- Sun icon -->
+                <svg id="light-icon" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <!-- Moon icon -->
+                <svg id="dark-icon" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+            {% block content %}{% endblock %}
+        </div>
     </div>
     
     <!-- Overlay container -->
@@ -40,5 +52,37 @@
     <script defer data-domain="your-domain.com" src="https://plausible.io/js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+    <script>
+        function setTheme(isDark) {
+            const darkIcon = document.getElementById('dark-icon');
+            const lightIcon = document.getElementById('light-icon');
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                darkIcon.classList.add('hidden');
+                lightIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                lightIcon.classList.add('hidden');
+                darkIcon.classList.remove('hidden');
+            }
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // Check time and set initial theme
+        const hour = new Date().getHours();
+        const isDarkHours = hour < 6 || hour >= 18;
+        const savedTheme = localStorage.getItem('theme');
+        
+        // Use saved theme or time-based default
+        setTheme(savedTheme ? savedTheme === 'dark' : isDarkHours);
+
+        // Toggle theme on button click
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const isDark = !document.documentElement.classList.contains('dark');
+            setTheme(isDark);
+        });
+    </script>
 </body>
 </html> 

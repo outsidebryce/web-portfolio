@@ -1,47 +1,49 @@
 <div class="overlay-background fixed inset-0 bg-black bg-opacity-50 z-50">
-    <div class="fixed inset-y-0 right-0 max-w-2xl w-full flex">
-        <!-- Overlay content -->
-        <div class="relative w-full bg-white shadow-xl transform transition-transform duration-500 ease-in-out translate-x-full overlay-content-animate md:rounded-l-lg overflow-y-auto">
-            <button id="close-overlay" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 focus:outline-none">
-                <span class="sr-only">Close</span>
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            
-            <!-- Post content -->
-            <div class="p-6">
-                {% if post.feature_image %}
-                <img 
-                    src="{{ post.feature_image }}" 
-                    alt="{{ post.title }}"
-                    class="w-full h-64 object-cover rounded-lg mb-8"
-                >
-                {% endif %}
-                
-                <h2 class="text-2xl mb-4">{{ post.title }}</h2>
-                <div class="text-gray-600 mb-8">
-                    {{ post.reading_time }} min read • 
-                    {{ post.published_at.split('T')[0] }}
-                </div>
-                
-                <div class="post-content prose max-w-none">
-                    {{ post.html | safe }}
+    <div class="overlay-content-animate fixed inset-y-0 right-0 max-w-[48rem] w-full bg-white dark:bg-[#141414] shadow-xl">
+        <!-- Close button -->
+        <div class="flex justify-between items-center px-6 py-4 border-b dark:border-gray-800">
+            <div class="flex items-center space-x-4">
+                <button onclick="closeOverlay()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ post.reading_time }} min read • {{ post.published_at.split('T')[0] }}</div>
                 </div>
             </div>
             
             <!-- Navigation -->
-            <div class="bg-gray-50 px-6 py-4">
-                {% if next_post %}
-                <button data-post-slug="{{ next_post.slug }}" class="next-post text-sm text-blue-600 hover:text-blue-800 ml-4">
-                    Next Post →
-                </button>
-                {% endif %}
+            <div class="flex space-x-4">
                 {% if prev_post %}
-                <button data-post-slug="{{ prev_post.slug }}" class="prev-post text-sm text-blue-600 hover:text-blue-800">
-                    ← Previous Post
+                <button data-post-slug="{{ prev_post.slug }}" class="prev-post text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    ← Prev
                 </button>
                 {% endif %}
+                {% if next_post %}
+                <button data-post-slug="{{ next_post.slug }}" class="next-post text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    Next →
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Post content -->
+        <div class="overflow-y-auto h-[calc(100vh-4rem)] overlay-content-area">
+            {% if post.feature_image %}
+            <img 
+                src="{{ post.feature_image }}" 
+                alt="{{ post.title }}"
+                class="w-full h-auto mb-8"
+            >
+            {% endif %}
+            
+            <div class="px-6">
+                <h2 class="text-2xl mb-4 dark:text-white">{{ post.title }}</h2>
+                
+                <div class="post-content prose max-w-none dark:prose-invert">
+                    {{ post.html | safe }}
+                </div>
             </div>
         </div>
     </div>
@@ -50,31 +52,12 @@
 <style>
     /* Animation styles */
     @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-        }
-        to {
-            transform: translateX(0);
-        }
-    }
-
-    @keyframes slideInMobile {
-        from {
-            transform: translateY(100%);
-        }
-        to {
-            transform: translateY(0);
-        }
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
     }
 
     .overlay-content-animate {
         animation: slideIn 0.3s forwards;
-    }
-
-    @media (max-width: 768px) {
-        .overlay-content-animate {
-            animation: slideInMobile 0.3s forwards;
-        }
     }
 
     /* Ensure Ghost content images are responsive */

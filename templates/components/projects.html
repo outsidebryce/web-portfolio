@@ -1,97 +1,80 @@
 <section class="mb-16">
-
-    
     <div class="swiper caseStudySwiper">
         <div class="swiper-wrapper">
-            {% for i in range(0, case_studies|length, 2) %}
+            {% for case_study in case_studies %}
             <div class="swiper-slide">
-                <div class="grid md:grid-cols-2 gap-8">
-                    <!-- First item in pair -->
-                    <article class="bg-white rounded-lg shadow-sm overflow-hidden">
-                        {% if case_studies[i].feature_image %}
-                        <div class="w-full h-[18rem] relative">
-                            <img 
-                                src="{{ case_studies[i].feature_image }}" 
-                                alt="{{ case_studies[i].title }}"
-                                class="w-full h-full object-cover"
-                                loading="lazy"
-                            >
-                        </div>
-                        {% endif %}
-                        <div class="p-6">
-                            <h3 class="text-xl mb-2">{{ case_studies[i].title }}</h3>
-                            <p class="text-gray-600 mb-4">{{ case_studies[i].excerpt }}</p>
-                            <a 
-                                href="#"
-                                class="case-study-link text-blue-600 hover:text-blue-800"
-                                data-slug="{{ case_studies[i].slug }}"
-                            >
-                                View Case Study →
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- Second item in pair (if exists) -->
-                    {% if i + 1 < case_studies|length %}
-                    <article class="bg-white rounded-lg shadow-sm overflow-hidden">
-                        {% if case_studies[i + 1].feature_image %}
-                        <div class="w-full h-[18rem] relative">
-                            <img 
-                                src="{{ case_studies[i + 1].feature_image }}" 
-                                alt="{{ case_studies[i + 1].title }}"
-                                class="w-full h-full object-cover"
-                                loading="lazy"
-                            >
-                        </div>
-                        {% endif %}
-                        <div class="p-6">
-                            <h3 class="text-xl mb-2">{{ case_studies[i + 1].title }}</h3>
-                            <p class="text-gray-600 mb-4">{{ case_studies[i + 1].excerpt }}</p>
-                            <a 
-                                href="#"
-                                class="case-study-link text-blue-600 hover:text-blue-800"
-                                data-slug="{{ case_studies[i + 1].slug }}"
-                            >
-                                View Case Study →
-                            </a>
-                        </div>
-                    </article>
+                <article class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    {% if case_study.feature_image %}
+                    <div class="w-full h-[18rem] relative">
+                        <img 
+                            src="{{ case_study.feature_image }}" 
+                            alt="{{ case_study.title }}"
+                            class="w-full h-full object-cover"
+                            loading="lazy"
+                        >
+                    </div>
                     {% endif %}
-                </div>
+                    <div class="p-6">
+                        <h3 class="text-xl mb-2">{{ case_study.title }}</h3>
+                        <p class="text-gray-600 mb-4">{{ case_study.excerpt }}</p>
+                        <a 
+                            href="#"
+                            class="case-study-link text-blue-600 hover:text-blue-800"
+                            data-slug="{{ case_study.slug }}"
+                        >
+                            View Case Study →
+                        </a>
+                    </div>
+                </article>
             </div>
             {% endfor %}
         </div>
 
-        <!-- Navigation buttons -->
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
+        <!-- Pagination dots -->
         <div class="swiper-pagination"></div>
     </div>
 </section>
 
-<!-- Initialize Swiper -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const swiper = new Swiper('.caseStudySwiper', {
-            // Optional parameters
-            loop: true,
-            speed: 500,
+        const initSwiper = () => new Swiper('.caseStudySwiper', {
+            loop: false,
+            spaceBetween: 30,
             autoplay: {
                 delay: 5000,
                 disableOnInteraction: false,
+                pauseOnMouseEnter: true
             },
-            
-            // Navigation arrows
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
+            breakpoints: {
+                // Mobile
+                0: {
+                    slidesPerView: 1,
+                },
+                // Desktop/Tablet (md)
+                768: {
+                    slidesPerView: 2,
+                }
             },
-            
-            // Pagination
             pagination: {
                 el: '.swiper-pagination',
                 clickable: true,
-            },
+            }
+        });
+
+        // Initialize on page load
+        window.caseStudySwiper = initSwiper();
+
+        // Pause autoplay when overlay opens
+        document.addEventListener('click', async (e) => {
+            const link = e.target.closest('.case-study-link');
+            if (link) {
+                window.caseStudySwiper.autoplay.stop();
+            }
+        });
+
+        // Resume autoplay when overlay closes
+        document.addEventListener('overlayClose', function() {
+            window.caseStudySwiper.autoplay.start();
         });
     });
 </script>
@@ -99,17 +82,15 @@
 <style>
     .swiper {
         width: 100%;
-        padding-bottom: 50px; /* Space for pagination */
+        padding-bottom: 50px;
     }
     
-    /* Custom navigation button colors */
     .swiper-button-next,
     .swiper-button-prev {
-        color: #2563eb; /* Tailwind blue-600 */
+        color: #2563eb;
     }
     
-    /* Custom pagination colors */
     .swiper-pagination-bullet-active {
-        background: #2563eb; /* Tailwind blue-600 */
+        background: #2563eb;
     }
 </style> 

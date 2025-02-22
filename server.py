@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request, redirect, session, url_for, abort
+from flask import Flask, render_template, send_from_directory, request, redirect, session, url_for, abort, jsonify
 from flask_compress import Compress
 from cachetools import TTLCache
 from datetime import datetime, timedelta
@@ -98,21 +98,31 @@ def case_study_post(slug):
     if not post:
         return abort(404)
     
-    # Regular page load
-    return render_template('blog_post.html', post=post,
+    return render_template('blog_post.html', 
+                         post=post,
                          next_post=get_next_post(post, tag='case-studies'),
                          prev_post=get_prev_post(post, tag='case-studies'))
 
 @app.route('/api/case-studies/<slug>')
 def get_case_study_content(slug):
     """API endpoint for fetching case study content"""
-    post = get_ghost_post(slug)
-    if not post:
-        return abort(404)
-    return render_template('components/post_overlay.html',
-                         post=post,
-                         next_post=get_next_post(post, tag='case-studies'),
-                         prev_post=get_prev_post(post, tag='case-studies'))
+    try:
+        post = get_ghost_post(slug)
+        if not post:
+            return abort(404)
+        
+        return jsonify({
+            'title': post['title'],
+            'html': post['html'],
+            'feature_image': post.get('feature_image'),
+            'reading_time': post.get('reading_time', 0),  # Default to 0 if missing
+            'published_at': post.get('published_at', ''),  # Default to empty string if missing
+            'next_post': get_next_post(post, tag='case-studies'),
+            'prev_post': get_prev_post(post, tag='case-studies')
+        })
+    except Exception as e:
+        print(f"Error processing case study: {e}")
+        return abort(500)
 
 @app.route('/blog/<slug>')
 def blog_post(slug):
@@ -124,14 +134,24 @@ def blog_post(slug):
 
 @app.route('/api/posts/<slug>')
 def get_post_content(slug):
-    """API endpoint for fetching blog post content"""
-    post = get_ghost_post(slug)
-    if not post:
-        return abort(404)
-    return render_template('components/post_overlay.html',
-                         post=post,
-                         next_post=get_next_post(post, tag='news'),
-                         prev_post=get_prev_post(post, tag='news'))
+    """API endpoint for fetching post content"""
+    try:
+        post = get_ghost_post(slug)
+        if not post:
+            return abort(404)
+        
+        return jsonify({
+            'title': post['title'],
+            'html': post['html'],
+            'feature_image': post.get('feature_image'),
+            'reading_time': post.get('reading_time', 0),  # Default to 0 if missing
+            'published_at': post.get('published_at', ''),  # Default to empty string if missing
+            'next_post': get_next_post(post),
+            'prev_post': get_prev_post(post)
+        })
+    except Exception as e:
+        print(f"Error processing post: {e}")
+        return abort(500)
 
 @app.after_request
 def add_cache_headers(response):
