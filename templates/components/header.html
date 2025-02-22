@@ -1,0 +1,19 @@
+<header class="text-center md:text-left">
+    <picture>
+        <source 
+            srcset="{{ url_for('static', filename='images/bryce-thompson.webp') }}" 
+            type="image/webp"
+        >
+        <img 
+            src="{{ url_for('static', filename='images/bryce-thompson.webp') }}" 
+            alt="Profile Picture" 
+            class="w-24 h-24 rounded-full mb-4"
+            loading="lazy"
+        >
+    </picture>
+    <h1 class="text-3xl font-bold mb-4">Bryce Thompson</h1>
+    <p class="text-gray-600 max-w-2xl">
+        I'm a lead product designer in Austin, TX helping your health, marketplace, or B2B company ship innovative experiences for your customers.
+        <a href="#" class="text-blue-600 hover:text-blue-800">View Portfolio</a>
+    </p>
+</header> 

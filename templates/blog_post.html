@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - Bryce Thompson{% endblock %}
+
+{% block content %}
+<article class="prose prose-lg mx-auto">
+    {% if post.feature_image %}
+    <img 
+        src="{{ post.feature_image }}" 
+        alt="{{ post.title }}"
+        class="w-full h-64 object-cover rounded-lg mb-8"
+    >
+    {% endif %}
+    
+    <h1 class="text-4xl font-bold mb-4">{{ post.title }}</h1>
+    <div class="text-gray-600 mb-8">
+        {{ post.reading_time }} min read • 
+        {{ post.published_at.split('T')[0] }}
+    </div>
+    
+    <div class="post-content">
+        {{ post.html | safe }}
+    </div>
+    
+    <div class="mt-12 pt-8 border-t">
+        <a href="/" class="text-blue-600 hover:text-blue-800">
+            ← Back to Home
+        </a>
+    </div>
+</article>
+{% endblock %}
+
+{% block head %}
+<style>
+    /* Ensure Ghost content images are responsive */
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+    }
+    
+    /* Add some spacing between elements */
+    .post-content > * + * {
+        margin-top: 1.5em;
+    }
+</style>
+{% endblock %} 

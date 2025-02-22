@@ -1,0 +1,91 @@
+<div class="overlay-background fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="fixed inset-y-0 right-0 max-w-2xl w-full flex">
+        <!-- Overlay content -->
+        <div class="relative w-full bg-white shadow-xl transform transition-transform duration-500 ease-in-out translate-x-full overlay-content-animate md:rounded-l-lg overflow-y-auto">
+            <button id="close-overlay" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 focus:outline-none">
+                <span class="sr-only">Close</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <!-- Post content -->
+            <div class="p-6">
+                {% if post.feature_image %}
+                <img 
+                    src="{{ post.feature_image }}" 
+                    alt="{{ post.title }}"
+                    class="w-full h-64 object-cover rounded-lg mb-8"
+                >
+                {% endif %}
+                
+                <h2 class="text-2xl font-bold mb-4">{{ post.title }}</h2>
+                <div class="text-gray-600 mb-8">
+                    {{ post.reading_time }} min read • 
+                    {{ post.published_at.split('T')[0] }}
+                </div>
+                
+                <div class="post-content prose max-w-none">
+                    {{ post.html | safe }}
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="bg-gray-50 px-6 py-4">
+                {% if next_post %}
+                <button data-post-slug="{{ next_post.slug }}" class="next-post text-sm text-blue-600 hover:text-blue-800 ml-4">
+                    Next Post →
+                </button>
+                {% endif %}
+                {% if prev_post %}
+                <button data-post-slug="{{ prev_post.slug }}" class="prev-post text-sm text-blue-600 hover:text-blue-800">
+                    ← Previous Post
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Animation styles */
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInMobile {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    .overlay-content-animate {
+        animation: slideIn 0.3s forwards;
+    }
+
+    @media (max-width: 768px) {
+        .overlay-content-animate {
+            animation: slideInMobile 0.3s forwards;
+        }
+    }
+
+    /* Ensure Ghost content images are responsive */
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+    }
+    
+    /* Add some spacing between elements */
+    .post-content > * + * {
+        margin-top: 1.5em;
+    }
+</style> 
