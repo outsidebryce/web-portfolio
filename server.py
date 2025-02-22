@@ -3,7 +3,7 @@ from flask_compress import Compress
 from cachetools import TTLCache
 from datetime import datetime, timedelta
 import os
-from api_config import get_linkedin_posts, get_dribbble_shots, get_dribbble_auth_url, get_dribbble_access_token, get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post
+from api_config import get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post
 
 app = Flask(__name__)
 Compress(app)
@@ -11,7 +11,7 @@ Compress(app)
 # Cache configuration
 cache = TTLCache(maxsize=100, ttl=3600)  # Cache for 1 hour
 
-# Sample data (will be replaced with API calls)
+# Sample data
 PLAYBOOK = [
     "UX Audit & Scorecard",
     "Remote Workshop",
@@ -38,24 +38,23 @@ TECH_STACK = [
 def home():
     ghost_posts = []
     case_studies = []
+    playbook_items = []
+    tech_stack_items = []
     
     try:
-        # Get Ghost posts tagged with 'News'
+        # Get posts for each tag
         ghost_posts = get_ghost_posts(limit=5, tag='news')
-    except Exception as e:
-        print(f"❌ Error fetching news posts: {str(e)}")
-
-    try:
-        # Get Ghost posts tagged with 'Case Studies'
         case_studies = get_case_studies(limit=6)
+        playbook_items = get_ghost_posts(limit=None, tag='playbook')
+        tech_stack_items = get_ghost_posts(limit=None, tag='tech-stack')
     except Exception as e:
-        print(f"❌ Error fetching case studies: {str(e)}")
+        print(f"❌ Error fetching posts: {str(e)}")
     
     return render_template('index.html',
-                         playbook=PLAYBOOK,
-                         tech_stack=TECH_STACK,
                          ghost_posts=ghost_posts,
-                         case_studies=case_studies)
+                         case_studies=case_studies,
+                         playbook_items=playbook_items,
+                         tech_stack_items=tech_stack_items)
 
 @app.route('/debug/linkedin')
 def debug_linkedin():
@@ -117,7 +116,7 @@ def get_case_study_content(slug):
 
 @app.route('/blog/<slug>')
 def blog_post(slug):
-    """Handle direct blog post URLs"""
+    """Handle direct blog post URLs - SEO friendly"""
     post = get_ghost_post(slug)
     if not post:
         return abort(404)

@@ -8,7 +8,7 @@
     <main class="mt-16">
         <section class="mb-16">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-xl font-semibold">Selected Cases</h2>
+                <h2 class="text-xl">Selected Cases</h2>
                 <a 
                     href="https://dribbble.com/yourusername" 
                     target="_blank" 
@@ -27,7 +27,7 @@
         {% if ghost_posts %}
         <section class="mb-16">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-xl font-semibold">Recent Writing</h2>
+                <h2 class="text-xl">Recent Writing</h2>
                 <a 
                     href="{{ ghost_posts[0].url.split('/')[2] }}"
                     target="_blank" 
@@ -44,7 +44,7 @@
                     class="post-link block bg-white rounded-lg p-4 hover:bg-gray-50"
                     data-slug="{{ post.slug }}"
                 >
-                    <h3 class="font-medium text-gray-900">{{ post.title }}</h3>
+                    <h3 class="text-gray-900">{{ post.title }}</h3>
                     <p class="text-sm text-gray-500 mt-1">
                         {{ post.reading_time }} min read • 
                         {{ post.published_at.split('T')[0] }}
@@ -55,24 +55,39 @@
         </section>
         {% endif %}
 
-        <section class="grid md:grid-cols-2 gap-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <!-- Playbook -->
             <div>
-                <h2 class="text-xl font-semibold mb-6">Playbook</h2>
-                <ul class="space-y-4">
-                    {% for item in playbook %}
-                    <li class="text-gray-700">{{ item }}</li>
+                <h2 class="text-xl mb-4">Playbook</h2>
+                <ul class="space-y-2">
+                    {% for item in playbook_items %}
+                    <li>
+                        <a href="#" 
+                           class="post-link text-gray-700 hover:text-blue-600"
+                           data-slug="{{ item.slug }}">
+                            {{ item.title }}
+                        </a>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
+
+            <!-- Tech Stack -->
             <div>
-                <h2 class="text-xl font-semibold mb-6">Tech stack</h2>
-                <ul class="space-y-4">
-                    {% for item in tech_stack %}
-                    <li class="text-gray-700">{{ item }}</li>
+                <h2 class="text-xl mb-4">Tech Stack</h2>
+                <ul class="space-y-2">
+                    {% for item in tech_stack_items %}
+                    <li>
+                        <a href="#" 
+                           class="post-link text-gray-700 hover:text-blue-600"
+                           data-slug="{{ item.slug }}">
+                            {{ item.title }}
+                        </a>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Overlay Container -->

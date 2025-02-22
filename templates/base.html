@@ -4,24 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Portfolio{% endblock %}</title>
+    
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@500&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@500&display=swap">
+    
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
-    <link rel="preconnect" href="https://rsms.me/inter/inter.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                }
-            }
+    
+    <style>
+        /* Font defaults */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Literata', serif;
+            font-weight: 400;
         }
-    </script>
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+    </style>
+    
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     {% block head %}{% endblock %}
 </head>
-<body class="font-inter bg-white text-gray-900">
+<body class="bg-white text-gray-900">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {% block content %}{% endblock %}
     </div>
