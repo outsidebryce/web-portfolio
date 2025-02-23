@@ -62,7 +62,17 @@ def get_ghost_post(slug):
 
 def get_case_studies(limit=None):
     """Get case studies from Ghost"""
-    return get_ghost_posts(limit=limit, tag='case-studies')
+    posts = get_ghost_posts(limit=limit, tag='case-studies')
+    
+    # Truncate excerpts to 120 characters and handle None values
+    for post in posts:
+        excerpt = post.get('excerpt') or ''  # Use empty string if excerpt is None
+        if len(excerpt) > 120:
+            post['excerpt'] = excerpt[:120].rstrip() + '...'
+        else:
+            post['excerpt'] = excerpt
+    
+    return posts
 
 def get_next_post(current_post, tag=None):
     """Get next post in chronological order"""

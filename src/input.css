@@ -7,6 +7,25 @@ html {
     overflow-y: scroll;
 }
 
+/* Post overlay styles */
+.overlay-content {
+    /* Title outside of post content */
+    .text-2xl {
+        @apply text-[3rem] leading-[3rem] font-normal;
+    }
+    
+    /* Post content styles */
+    .post-content {
+        h2 {
+            @apply text-[1.5rem] leading-[1.5rem] font-normal mb-4;
+        }
+        
+        h3, h4, h5, h6 {
+            @apply font-normal;
+        }
+    }
+}
+
 /* Optional: Style the scrollbar for better aesthetics */
 ::-webkit-scrollbar {
     width: 8px;
