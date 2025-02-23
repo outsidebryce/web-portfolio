@@ -144,15 +144,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Modify click handler to include article clicks
+    // Add click handlers for Playbook and Tech Stack items
+    document.querySelectorAll('.grid a[data-slug]').forEach(link => {
+        link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const slug = e.target.getAttribute('data-slug');
+            try {
+                await updateOverlayContent(slug, 'posts');
+            } catch (error) {
+                console.error('Error opening overlay:', error);
+            }
+        });
+    });
+
+    // Update the existing click handler to include these sections
     document.addEventListener('click', async (e) => {
-        const link = e.target.closest('.post-link, .case-study-link, article[data-slug]');
+        const link = e.target.closest('.post-link, .case-study-link, [data-slug]');
         if (!link) return;
         
         e.preventDefault();
         
         const slug = link.getAttribute('data-slug');
-        const type = link.classList.contains('post-link') ? 'posts' : 'case-studies';
+        const type = link.classList.contains('case-study-link') ? 'case-studies' : 'posts';
         
         try {
             await updateOverlayContent(slug, type);

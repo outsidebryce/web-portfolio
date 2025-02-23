@@ -97,11 +97,75 @@
                     <canvas id="skillsRadar" height="400"></canvas>
                 </div>
                 <div class="w-full md:w-1/2 space-y-4 text-[0.9rem] text-gray-600 dark:text-gray-300">
-                    <p><strong class="text-gray-900 dark:text-white">Strategic & Product Insight</strong> — Encompasses product vision, market understanding, and user empathy.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Technical & Engineering Mastery</strong> — Core technical skills including coding, system design, and engineering challenges.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Design & Creative Execution</strong> — Design thinking, UX expertise, and visual communication abilities.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Collaboration & Communication</strong> — Interpersonal and stakeholder engagement for cross-functional success.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Innovation & Adaptability</strong> — Creative problem solving and agility in adapting to new technologies.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Product</strong> — Encompasses product vision, market understanding, and user empathy.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Technical</strong> — Core technical skills including coding, system design, and engineering challenges.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Design</strong> — Design thinking, UX expertise, and visual communication abilities.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Collaboration</strong> — Interpersonal and stakeholder engagement for cross-functional success.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Adaptability</strong> — Creative problem solving and agility in adapting to new technologies.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-xl mb-4">GitHub Contributions</h2>
+            <div class="flex flex-col space-y-2">
+                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    {{ github_contributions.total }} contributions in the last year
+                </div>
+
+                <!-- Overflow wrapper around entire chart -->
+                <div class="overflow-x-auto">
+                    <!-- Fixed-width container matching 52 weeks of contributions -->
+                    <div class="w-[574px]"> <!-- 52 weeks * (10px square + 3px gap) + 40px label = 574px -->
+                        <!-- Months header -->
+                        <div class="pl-10">
+                            <div class="flex">
+                                {% for month in ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'] %}
+                                <div class="text-xs text-gray-600 dark:text-gray-400 text-left" style="width: 61px">{{ month }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Days and Grid -->
+                        <div class="flex flex-col gap-[3px] mt-1">
+                            {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                            <div class="flex items-center">
+                                <div class="w-10 flex-shrink-0 text-xs text-gray-600 dark:text-gray-400 pr-2">{{ day }}</div>
+                                <div class="flex gap-[3px]">
+                                    {% for i in range(52) %}
+                                    {% set contribution_key = day + '-' + i|string %}
+                                    {% set count = github_contributions.data.get(contribution_key, 0) %}
+                                    <div 
+                                        class="w-[10px] h-[10px] flex-shrink-0 rounded-sm
+                                        {% if count == 0 %}bg-gray-100 dark:bg-gray-800
+                                        {% elif count < 2 %}bg-blue-100 dark:bg-blue-950
+                                        {% elif count < 4 %}bg-blue-200 dark:bg-blue-900
+                                        {% elif count < 6 %}bg-blue-300 dark:bg-blue-800
+                                        {% elif count < 8 %}bg-blue-400 dark:bg-blue-700
+                                        {% else %}bg-blue-500 dark:bg-blue-600
+                                        {% endif %}
+                                        hover:ring-2 hover:ring-blue-500 transition-all"
+                                        title="{{ count }} contributions on {{ day }}"
+                                    ></div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex items-center justify-end text-xs text-gray-600 dark:text-gray-400 space-x-2 mt-2">
+                    <span>Less</span>
+                    <div class="flex gap-[3px]">
+                        <div class="w-[10px] h-[10px] rounded-sm bg-gray-100 dark:bg-gray-800"></div>
+                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-100 dark:bg-blue-950"></div>
+                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-200 dark:bg-blue-900"></div>
+                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-300 dark:bg-blue-800"></div>
+                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-500 dark:bg-blue-600"></div>
+                    </div>
+                    <span>More</span>
                 </div>
             </div>
         </section>

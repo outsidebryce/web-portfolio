@@ -4,6 +4,12 @@ from cachetools import TTLCache
 from datetime import datetime, timedelta
 import os
 from api_config import get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post
+import requests
+from dateutil.relativedelta import relativedelta
+from dotenv import load_dotenv
+import logging
+
+load_dotenv()  # Add this near the top of server.py, before the GITHUB_TOKEN is used
 
 app = Flask(__name__)
 Compress(app)
@@ -34,6 +40,76 @@ TECH_STACK = [
     "Element"
 ]
 
+# Add this to your configuration
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+GITHUB_USERNAME = 'outsidebryce'
+
+logging.basicConfig(level=logging.DEBUG)
+
+def get_github_contributions(token):
+    # Calculate date range - ensure we get a full year including today
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=364)  # Change from 365 to 364 to include today
+    
+    query = """
+    query($username:String!, $from:DateTime!, $to:DateTime!) {
+      user(login: $username) {
+        contributionsCollection(from: $from, to: $to) {
+          contributionCalendar {
+            totalContributions
+            weeks {
+              contributionDays {
+                contributionCount
+                date
+                weekday
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    
+    variables = {
+        "username": "outsidebryce",
+        "from": start_date.strftime("%Y-%m-%dT00:00:00"),  # Start at beginning of start date
+        "to": end_date.strftime("%Y-%m-%dT23:59:59")       # End at end of end date
+    }
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    response = requests.post(
+        'https://api.github.com/graphql',
+        json={'query': query, 'variables': variables},
+        headers=headers
+    )
+    
+    if response.status_code == 200:
+        data = response.json()
+        logging.debug(f"Raw GitHub response: {data}")  # Add logging to see raw response
+        
+        calendar = data['data']['user']['contributionsCollection']['contributionCalendar']
+        contributions = {
+            'total': calendar['totalContributions'],
+            'data': {}
+        }
+        
+        # Process the contribution data
+        for week in calendar['weeks']:
+            for day in week['contributionDays']:
+                date = datetime.fromisoformat(day['date'])
+                days_from_end = (end_date - date).days
+                week_number = days_from_end // 7
+                weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday()]
+                key = f"{weekday}-{week_number}"
+                contributions['data'][key] = day['contributionCount']
+        
+        logging.debug(f"Processed contributions: {contributions}")
+        return contributions
+    else:
+        logging.error(f"GitHub API Error: {response.status_code}")
+        return None
+
 @app.route('/')
 def home():
     ghost_posts = []
@@ -50,11 +126,14 @@ def home():
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
     
+    github_contributions = get_github_contributions(GITHUB_TOKEN)
+    
     return render_template('index.html',
                          ghost_posts=ghost_posts,
                          case_studies=case_studies,
                          playbook_items=playbook_items,
-                         tech_stack_items=tech_stack_items)
+                         tech_stack_items=tech_stack_items,
+                         github_contributions=github_contributions)
 
 @app.route('/debug/linkedin')
 def debug_linkedin():
