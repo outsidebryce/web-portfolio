@@ -1,39 +1,39 @@
-<section class="mb-16">
-    <div class="swiper caseStudySwiper">
-        <div class="swiper-wrapper">
-            {% for case_study in case_studies %}
-            <div class="swiper-slide">
-                <article class="bg-white rounded-lg shadow-sm overflow-hidden">
-                    {% if case_study.feature_image %}
-                    <div class="w-full h-[18rem] relative">
-                        <img 
-                            src="{{ case_study.feature_image }}" 
-                            alt="{{ case_study.title }}"
-                            class="w-full h-full object-cover"
-                            loading="lazy"
-                        >
-                    </div>
-                    {% endif %}
-                    <div class="p-6">
-                        <h3 class="text-xl mb-2">{{ case_study.title }}</h3>
-                        <p class="text-gray-600 mb-4">{{ case_study.excerpt }}</p>
-                        <a 
-                            href="#"
-                            class="case-study-link text-blue-600 hover:text-blue-800"
-                            data-slug="{{ case_study.slug }}"
-                        >
-                            View Case Study →
-                        </a>
-                    </div>
-                </article>
-            </div>
-            {% endfor %}
+<div class="swiper caseStudySwiper">
+    <div class="swiper-wrapper">
+        {% for case_study in case_studies %}
+        <div class="swiper-slide">
+            <article 
+                class="bg-white rounded-lg shadow-sm overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-md transition-shadow"
+                data-slug="{{ case_study.slug }}"
+            >
+                {% if case_study.feature_image %}
+                <div class="w-full md:h-[18rem] h-[40vh] relative case-study-link" data-slug="{{ case_study.slug }}">
+                    <img 
+                        src="{{ case_study.feature_image }}" 
+                        alt="{{ case_study.title }}"
+                        class="w-full h-full object-cover"
+                        loading="lazy"
+                    >
+                </div>
+                {% endif %}
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="text-[1.75rem] md:text-2xl mb-2">{{ case_study.title }}</h3>
+                    <p class="text-gray-600 mb-4 flex-grow text-lg">{{ case_study.excerpt }}</p>
+                    <a 
+                        href="#"
+                        class="case-study-link text-blue-600 hover:text-blue-800 mt-auto text-lg"
+                        data-slug="{{ case_study.slug }}"
+                    >
+                        View Case Study →
+                    </a>
+                </div>
+            </article>
         </div>
-
-        <!-- Pagination dots -->
-        <div class="swiper-pagination"></div>
+        {% endfor %}
     </div>
-</section>
+
+    <div class="swiper-pagination"></div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -46,11 +46,9 @@
                 pauseOnMouseEnter: true
             },
             breakpoints: {
-                // Mobile
                 0: {
                     slidesPerView: 1,
                 },
-                // Desktop/Tablet (md)
                 768: {
                     slidesPerView: 2,
                 }
@@ -61,10 +59,8 @@
             }
         });
 
-        // Initialize on page load
         window.caseStudySwiper = initSwiper();
 
-        // Pause autoplay when overlay opens
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('.case-study-link');
             if (link) {
@@ -72,7 +68,6 @@
             }
         });
 
-        // Resume autoplay when overlay closes
         document.addEventListener('overlayClose', function() {
             window.caseStudySwiper.autoplay.start();
         });
@@ -85,9 +80,16 @@
         padding-bottom: 50px;
     }
     
-    .swiper-button-next,
-    .swiper-button-prev {
-        color: #2563eb;
+    @media (min-width: 768px) {
+        .swiper-slide {
+            height: auto;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .swiper-slide {
+            height: calc(100vh - 300px);
+        }
     }
     
     .swiper-pagination-bullet-active {

@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force scrollbar to always show to prevent layout shift */
+html {
+    overflow-y: scroll;
+}
+
+/* Optional: Style the scrollbar for better aesthetics */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
 /* Dark mode styles */
 .dark {
     @apply bg-[#141414];

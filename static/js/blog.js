@@ -134,36 +134,30 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // Use event delegation with more specific targeting
+    // Add escape key handler
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const overlay = document.querySelector('.overlay-content');
+            if (overlay) {
+                closeOverlayWithAnimation();
+            }
+        }
+    });
+
+    // Modify click handler to include article clicks
     document.addEventListener('click', async (e) => {
-        // Find closest link ancestor with relevant classes
-        const link = e.target.closest('.post-link, .case-study-link');
+        const link = e.target.closest('.post-link, .case-study-link, article[data-slug]');
         if (!link) return;
         
-        // Debug log
-        console.log('Link clicked:', {
-            href: link.getAttribute('href'),
-            slug: link.getAttribute('data-slug'),
-            classes: link.className,
-            isInSwiper: !!link.closest('.swiper-slide')
-        });
-        
-        // Prevent default before any other operations
         e.preventDefault();
         
         const slug = link.getAttribute('data-slug');
-        const type = link.classList.contains('case-study-link') ? 'case-studies' : 'posts';
+        const type = link.classList.contains('post-link') ? 'posts' : 'case-studies';
         
         try {
             await updateOverlayContent(slug, type);
         } catch (error) {
             console.error('Error in click handler:', error);
-            console.error('Full error details:', {
-                slug,
-                type,
-                error: error.message,
-                stack: error.stack
-            });
         }
     });
 
