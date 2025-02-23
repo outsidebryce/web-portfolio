@@ -31,6 +31,7 @@
     
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block head %}{% endblock %}
 </head>
 <body class="bg-white text-gray-900">
@@ -86,6 +87,7 @@
     <script defer data-domain="your-domain.com" src="https://plausible.io/js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+    {% block scripts %}{% endblock %}
     <script>
         function setTheme(isDark) {
             const darkIcon = document.getElementById('dark-icon');

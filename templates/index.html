@@ -88,6 +88,23 @@
                 </ul>
             </div>
         </div>
+
+        <!-- Add this after your existing sections -->
+        <section class="mb-16">
+            <h2 class="text-xl mb-8">Competencies</h2>
+            <div class="flex flex-col md:flex-row items-start gap-8">
+                <div class="w-full md:w-1/2">
+                    <canvas id="skillsRadar" height="400"></canvas>
+                </div>
+                <div class="w-full md:w-1/2 space-y-4 text-[0.9rem] text-gray-600 dark:text-gray-300">
+                    <p><strong class="text-gray-900 dark:text-white">Strategic & Product Insight</strong> — Encompasses product vision, market understanding, and user empathy.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Technical & Engineering Mastery</strong> — Core technical skills including coding, system design, and engineering challenges.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Design & Creative Execution</strong> — Design thinking, UX expertise, and visual communication abilities.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Collaboration & Communication</strong> — Interpersonal and stakeholder engagement for cross-functional success.</p>
+                    <p><strong class="text-gray-900 dark:text-white">Innovation & Adaptability</strong> — Creative problem solving and agility in adapting to new technologies.</p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Overlay Container -->
@@ -96,4 +113,95 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('skillsRadar');
+    
+    if (!ctx) {
+        console.error('Could not find skillsRadar canvas element');
+        return;
+    }
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: [
+                'Product',
+                'Technical',
+                'Design',
+                'Collaboration',
+                'Adaptability'
+            ],
+            datasets: [{
+                data: [4, 3, 4, 5, 4],
+                backgroundColor: isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(37, 99, 235, 0.2)',
+                borderColor: isDark ? 'rgba(59, 130, 246, 0.8)' : 'rgba(37, 99, 235, 0.8)',
+                borderWidth: 2,
+                pointBackgroundColor: isDark ? 'rgba(59, 130, 246, 1)' : 'rgba(37, 99, 235, 1)',
+                pointBorderColor: isDark ? '#141414' : '#fff',
+                pointHoverBackgroundColor: isDark ? '#141414' : '#fff',
+                pointHoverBorderColor: isDark ? 'rgba(59, 130, 246, 1)' : 'rgba(37, 99, 235, 1)'
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    min: 0,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        display: false,
+                        color: textColor
+                    },
+                    grid: {
+                        color: gridColor
+                    },
+                    angleLines: {
+                        color: gridColor
+                    },
+                    pointLabels: {
+                        font: {
+                            size: 12
+                        },
+                        color: textColor
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Update chart colors when theme changes
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === "class") {
+                const isDark = document.documentElement.classList.contains('dark');
+                const chart = Chart.instances[0];
+                const textColor = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)';
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                
+                chart.options.scales.r.grid.color = gridColor;
+                chart.options.scales.r.angleLines.color = gridColor;
+                chart.options.scales.r.pointLabels.color = textColor;
+                chart.options.scales.r.ticks.color = textColor;
+                chart.data.datasets[0].pointBorderColor = isDark ? '#141414' : '#fff';
+                chart.data.datasets[0].pointHoverBackgroundColor = isDark ? '#141414' : '#fff';
+                chart.update();
+            }
+        });
+    });
+
+    observer.observe(document.documentElement, {
+        attributes: true
+    });
+});
+</script>
 {% endblock %} 
