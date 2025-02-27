@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Full overlay HTML with animations for initial open
                 const overlayHTML = `
                     <div class="overlay-background fixed inset-0 bg-black bg-opacity-50 z-50 fade-in">
-                        <div class="overlay-content fixed inset-y-0 right-0 w-full sm:min-w-[48rem] sm:max-w-4xl bg-white dark:bg-[#141414] shadow-xl z-50
+                        <div class="overlay-content fixed inset-y-0 right-0 w-full sm:max-w-[50%] sm:max-w-4xl bg-white dark:bg-[#141414] shadow-xl z-50
                             sm:translate-x-0 sm:slide-in-right
                             translate-y-0 slide-in-bottom
                             h-full">
@@ -144,25 +144,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add click handlers for Playbook and Tech Stack items
-    document.querySelectorAll('.grid a[data-slug]').forEach(link => {
-        link.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const slug = e.target.getAttribute('data-slug');
-            try {
-                await updateOverlayContent(slug, 'posts');
-            } catch (error) {
-                console.error('Error opening overlay:', error);
-            }
-        });
-    });
-
-    // Update the existing click handler to include these sections
+    // Keep this block as is - it handles all cases
     document.addEventListener('click', async (e) => {
+        // Prevent multiple handlers from firing
+        if (e.handled === true) return;
+        e.handled = true;
+        
         const link = e.target.closest('.post-link, .case-study-link, [data-slug]');
         if (!link) return;
         
         e.preventDefault();
+        e.stopPropagation();
         
         const slug = link.getAttribute('data-slug');
         const type = link.classList.contains('case-study-link') ? 'case-studies' : 'posts';
@@ -180,4 +172,71 @@ document.addEventListener('DOMContentLoaded', function() {
             closeOverlayWithAnimation();
         }
     });
-}); 
+
+    // Comment out welcome message initialization
+    // playWelcomeMessage();
+
+    // Comment out welcome message click handler
+    // document.getElementById('play-welcome')?.addEventListener('click', playWelcomeMessage);
+});
+
+// Keep the function but comment it out for later use
+/*
+let currentAudio = null;
+async function playWelcomeMessage() {
+    // Stop any currently playing audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+
+    const API_KEY = 'sk_63f366f1227aa36563292a4af2ab75900c704b6e9e7ed2aa';
+    const VOICE_ID = 'jINhJbuT1SpPyz9weXfW';
+    
+    const text = "Hello, I'm Bryce. I'm a lead product designer in Austin, Texas, helping your health, marketplace, or B2B company ship innovative experiences for your customers.";
+    
+    try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'audio/mpeg',
+                'Content-Type': 'application/json',
+                'xi-api-key': API_KEY
+            },
+            body: JSON.stringify({
+                text: text,
+                model_id: 'eleven_monolingual_v1',
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.5
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`TTS request failed: ${errorData}`);
+        }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        // Set the current audio instance
+        currentAudio = audio;
+        
+        // Clean up when audio finishes
+        audio.addEventListener('ended', () => {
+            URL.revokeObjectURL(audioUrl); // Clean up the blob URL
+            currentAudio = null;
+        });
+        
+        // Play the audio
+        await audio.play();
+        
+    } catch (error) {
+        console.error('Error playing welcome message:', error);
+        currentAudio = null;
+    }
+}
+*/ 

@@ -232,6 +232,76 @@ def get_post_content(slug):
         print(f"Error processing post: {e}")
         return abort(500)
 
+@app.route('/api/chat', methods=['POST'])
+async def chat():
+    try:
+        data = request.json
+        message = data.get('message')
+        
+        # Get AI response using BryceAI
+        ai_response = await bryce_ai.get_response(message)
+        
+        # Use environment variable for Voice ID
+        VOICE_ID = os.getenv('ELEVEN_LABS_VOICE_ID')
+        
+        tts_response = requests.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
+            headers={
+                "Accept": "audio/mpeg",
+                "Content-Type": "application/json",
+                "xi-api-key": os.getenv('ELEVEN_LABS_API_KEY')
+            },
+            json={
+                "text": ai_response,
+                "model_id": "eleven_monolingual_v1",
+                "voice_settings": {
+                    "stability": 0.5,
+                    "similarity_boost": 0.5
+                }
+            }
+        )
+        
+        if tts_response.status_code != 200:
+            raise Exception(f"TTS API request failed: {tts_response.text}")
+            
+        # Add rate limiting and cleanup
+        current_time = datetime.now()
+        audio_filename = f"audio_{current_time.timestamp()}.mp3"
+        audio_path = os.path.join(app.static_folder, 'audio', audio_filename)
+        
+        # Cleanup old audio files (keep last 24 hours)
+        cleanup_old_audio_files()
+        
+        with open(audio_path, 'wb') as f:
+            f.write(tts_response.content)
+            
+        return jsonify({
+            'text': ai_response,
+            'audioUrl': url_for('static', filename=f'audio/{audio_filename}')
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Chat error: {str(e)}")
+        return jsonify({'error': 'An error occurred processing your request'}), 500
+
+def cleanup_old_audio_files():
+    """Remove audio files older than 24 hours"""
+    audio_dir = os.path.join(app.static_folder, 'audio')
+    current_time = datetime.now()
+    
+    for filename in os.listdir(audio_dir):
+        if not filename.endswith('.mp3'):
+            continue
+            
+        file_path = os.path.join(audio_dir, filename)
+        file_time = datetime.fromtimestamp(os.path.getctime(file_path))
+        
+        if current_time - file_time > timedelta(hours=24):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                app.logger.error(f"Error removing old audio file {filename}: {str(e)}")
+
 @app.after_request
 def add_cache_headers(response):
     """Add cache headers to static assets"""
