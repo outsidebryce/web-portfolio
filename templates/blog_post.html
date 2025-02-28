@@ -3,6 +3,8 @@
 {% block title %}{{ post.title }} - Bryce Thompson{% endblock %}
 
 {% block content %}
+{% include 'components/header.html' %}
+
 <article class="prose prose-lg mx-auto">
     {% if post.feature_image %}
     <img 

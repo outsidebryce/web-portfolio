@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Blog - Bryce Thompson{% endblock %}
+
+{% block content %}
+{% include 'components/header.html' %}
+
+<div class="max-w-4xl mx-auto pt-32">
+    <h1 class="text-4xl mb-8">Blog</h1>
+    
+    <div class="space-y-8">
+        {% for post in posts %}
+        <article class="bg-white dark:bg-[#141414] rounded-lg shadow-sm p-6">
+            <h2 class="text-2xl mb-2">
+                <a href="/blog/{{ post.slug }}" class="hover:text-blue-600 dark:hover:text-blue-400">
+                    {{ post.title }}
+                </a>
+            </h2>
+            <div class="text-gray-600 dark:text-gray-400 mb-4">
+                {{ post.reading_time }} min read • 
+                {{ post.published_at.split('T')[0] }}
+            </div>
+            {% if post.excerpt %}
+            <p class="text-gray-700 dark:text-gray-300">{{ post.excerpt }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

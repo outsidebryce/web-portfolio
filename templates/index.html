@@ -3,180 +3,191 @@
 {% block title %}Bryce Thompson - Product Designer{% endblock %}
 
 {% block content %}
-    {% include "components/header.html" %}
-    
-    <main class="mt-16">
-        <section class="mb-16">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-xl">Selected Cases</h2>
-                <a 
-                    href="https://dribbble.com/yourusername" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
-                >
-                    View All
-                </a>
-            </div>
-            {% include "components/projects.html" %}
-        </section>
+{% include "components/header.html" %}
 
-        <!-- Social Feed Section -->
+<!-- Homepage Intro -->
+<div class="text-center md:text-left pt-[100px]">
+    <div class="relative inline-block md:block">
+        
+    </div>
+    <h1 class="text-[2rem] md:text-[4rem] leading-tight mb-4">Hello, I'm Bryce</h1>
+    <p class="text-gray-600 dark:text-gray-400 max-w-2xl text-[0.9rem] md:mx-0 mx-auto">
+        I'm the lead product designer of Nova, a studio based in Austin, TX helping health, marketplace, or B2B companies ship innovative experiences. 
+    </p>
+</div>
+
+<main class="mt-16">
+    <section class="mb-16">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl">Selected Cases</h2>
+            <a 
+                href="https://dribbble.com/yourusername" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+            >
+                View All
+            </a>
+        </div>
+        {% include "components/projects.html" %}
+    </section>
+
+    <!-- Social Feed Section -->
     
 
-        {% if ghost_posts %}
-        <section class="mb-16">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-xl">Recent Writing</h2>
-                <a 
-                    href="{{ ghost_posts[0].url.split('/')[2] }}"
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="text-blue-600 hover:text-blue-800"
-                >
-                    View All →
-                </a>
-            </div>
-            <div class="space-y-4">
-                {% for post in ghost_posts %}
-                <a 
-                    href="/blog/{{ post.slug }}"
-                    class="post-link block bg-white rounded-lg p-4 hover:bg-gray-50"
-                    data-slug="{{ post.slug }}"
-                >
-                    <h3 class="text-gray-900">{{ post.title }}</h3>
-                    <p class="text-sm text-gray-500 mt-1">
-                        {{ post.reading_time }} min read • 
-                        {{ post.published_at.split('T')[0] }}
-                    </p>
-                </a>
+    {% if ghost_posts %}
+    <section class="mb-16">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl">Recent Writing</h2>
+            <a 
+                href="{{ ghost_posts[0].url.split('/')[2] }}"
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="text-blue-600 hover:text-blue-800"
+            >
+                View All →
+            </a>
+        </div>
+        <div class="space-y-4">
+            {% for post in ghost_posts %}
+            <a 
+                href="/blog/{{ post.slug }}"
+                class="post-link block bg-white rounded-lg p-4 hover:bg-gray-50"
+                data-slug="{{ post.slug }}"
+            >
+                <h3 class="text-gray-900">{{ post.title }}</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ post.reading_time }} min read • 
+                    {{ post.published_at.split('T')[0] }}
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <!-- Playbook -->
+        <div>
+            <h2 class="text-xl mb-4">Playbook</h2>
+            <ul class="space-y-2">
+                {% for item in playbook_items %}
+                <li>
+                    <a href="/blog/{{ item.slug }}" 
+                       class="post-link text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                       data-slug="{{ item.slug }}">
+                        {{ item.title }}
+                    </a>
+                </li>
                 {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <!-- Playbook -->
-            <div>
-                <h2 class="text-xl mb-4">Playbook</h2>
-                <ul class="space-y-2">
-                    {% for item in playbook_items %}
-                    <li>
-                        <a href="#" 
-                           class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                           data-slug="{{ item.slug }}">
-                            {{ item.title }}
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- Tech Stack -->
-            <div>
-                <h2 class="text-xl mb-4">Tech Stack</h2>
-                <ul class="space-y-2">
-                    {% for item in tech_stack_items %}
-                    <li>
-                        <a href="#" 
-                           class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                           data-slug="{{ item.slug }}">
-                            {{ item.title }}
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
+            </ul>
         </div>
 
-        <!-- Add this after your existing sections -->
-        <section class="mb-16">
-            <h2 class="text-xl mb-8">Competencies</h2>
-            <div class="flex flex-col md:flex-row items-start gap-8">
-                <div class="w-full md:w-1/2">
-                    <canvas id="skillsRadar" height="400"></canvas>
-                </div>
-                <div class="w-full md:w-1/2 space-y-4 text-[0.9rem] text-gray-600 dark:text-gray-300">
-                    <p><strong class="text-gray-900 dark:text-white">Product</strong> — Encompasses product vision, market understanding, and user empathy.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Technical</strong> — Core technical skills including coding, system design, and engineering challenges.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Design</strong> — Design thinking, UX expertise, and visual communication abilities.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Collaboration</strong> — Interpersonal and stakeholder engagement for cross-functional success.</p>
-                    <p><strong class="text-gray-900 dark:text-white">Adaptability</strong> — Creative problem solving and agility in adapting to new technologies.</p>
-                </div>
+        <!-- Tech Stack -->
+        <div>
+            <h2 class="text-xl mb-4">Tech Stack</h2>
+            <ul class="space-y-2">
+                {% for item in tech_stack_items %}
+                <li>
+                    <a href="/blog/{{ item.slug }}"
+                       class="post-link text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                       data-slug="{{ item.slug }}">
+                        {{ item.title }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Add this after your existing sections -->
+    <section class="mb-16">
+        <h2 class="text-xl mb-8">Competencies</h2>
+        <div class="flex flex-col md:flex-row items-start gap-8">
+            <div class="w-full md:w-1/2">
+                <canvas id="skillsRadar" height="400"></canvas>
             </div>
-        </section>
+            <div class="w-full md:w-1/2 space-y-4 text-[0.9rem] text-gray-600 dark:text-gray-300">
+                <p><strong class="text-gray-900 dark:text-white">Product</strong> — Encompasses product vision, market understanding, and user empathy.</p>
+                <p><strong class="text-gray-900 dark:text-white">Technical</strong> — Core technical skills including coding, system design, and engineering challenges.</p>
+                <p><strong class="text-gray-900 dark:text-white">Design</strong> — Design thinking, UX expertise, and visual communication abilities.</p>
+                <p><strong class="text-gray-900 dark:text-white">Collaboration</strong> — Interpersonal and stakeholder engagement for cross-functional success.</p>
+                <p><strong class="text-gray-900 dark:text-white">Adaptability</strong> — Creative problem solving and agility in adapting to new technologies.</p>
+            </div>
+        </div>
+    </section>
 
-        <section class="mb-16">
-            <h2 class="text-xl mb-4">GitHub Contributions</h2>
-            <div class="flex flex-col space-y-2">
-                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    {{ github_contributions.total }} contributions in the last year
-                </div>
+    <section class="mb-16">
+        <h2 class="text-xl mb-4">GitHub Contributions</h2>
+        <div class="flex flex-col space-y-2">
+            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                {{ github_contributions.total }} contributions in the last year
+            </div>
 
-                <!-- Overflow wrapper around entire chart -->
-                <div class="overflow-x-auto">
-                    <!-- Fixed-width container matching 52 weeks of contributions -->
-                    <div class="w-[574px]"> <!-- 52 weeks * (10px square + 3px gap) + 40px label = 574px -->
-                        <!-- Months header -->
-                        <div class="pl-10">
-                            <div class="flex">
-                                {% for month in ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'] %}
-                                <div class="text-xs text-gray-600 dark:text-gray-400 text-left" style="width: 61px">{{ month }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <!-- Days and Grid -->
-                        <div class="flex flex-col gap-[3px] mt-1">
-                            {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
-                            <div class="flex items-center">
-                                <div class="w-10 flex-shrink-0 text-xs text-gray-600 dark:text-gray-400 pr-2">{{ day }}</div>
-                                <div class="flex gap-[3px]">
-                                    {% for i in range(52) %}
-                                    {% set contribution_key = day + '-' + i|string %}
-                                    {% set count = github_contributions.data.get(contribution_key, 0) %}
-                                    <div 
-                                        class="w-[10px] h-[10px] flex-shrink-0 rounded-sm
-                                        {% if count == 0 %}bg-gray-100 dark:bg-gray-800
-                                        {% elif count < 2 %}bg-blue-100 dark:bg-blue-950
-                                        {% elif count < 4 %}bg-blue-200 dark:bg-blue-900
-                                        {% elif count < 6 %}bg-blue-300 dark:bg-blue-800
-                                        {% elif count < 8 %}bg-blue-400 dark:bg-blue-700
-                                        {% else %}bg-blue-500 dark:bg-blue-600
-                                        {% endif %}
-                                        hover:ring-2 hover:ring-blue-500 transition-all"
-                                        title="{{ count }} contributions on {{ day }}"
-                                    ></div>
-                                    {% endfor %}
-                                </div>
-                            </div>
+            <!-- Overflow wrapper around entire chart -->
+            <div class="overflow-x-auto">
+                <!-- Fixed-width container matching 52 weeks of contributions -->
+                <div class="w-[574px]"> <!-- 52 weeks * (10px square + 3px gap) + 40px label = 574px -->
+                    <!-- Months header -->
+                    <div class="pl-10">
+                        <div class="flex">
+                            {% for month in ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'] %}
+                            <div class="text-xs text-gray-600 dark:text-gray-400 text-left" style="width: 61px">{{ month }}</div>
                             {% endfor %}
                         </div>
                     </div>
-                </div>
 
-                <!-- Legend -->
-                <div class="flex items-center justify-end text-xs text-gray-600 dark:text-gray-400 space-x-2 mt-2">
-                    <span>Less</span>
-                    <div class="flex gap-[3px]">
-                        <div class="w-[10px] h-[10px] rounded-sm bg-gray-100 dark:bg-gray-800"></div>
-                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-100 dark:bg-blue-950"></div>
-                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-200 dark:bg-blue-900"></div>
-                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-300 dark:bg-blue-800"></div>
-                        <div class="w-[10px] h-[10px] rounded-sm bg-blue-500 dark:bg-blue-600"></div>
+                    <!-- Days and Grid -->
+                    <div class="flex flex-col gap-[3px] mt-1">
+                        {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                        <div class="flex items-center">
+                            <div class="w-10 flex-shrink-0 text-xs text-gray-600 dark:text-gray-400 pr-2">{{ day }}</div>
+                            <div class="flex gap-[3px]">
+                                {% for i in range(52) %}
+                                {% set contribution_key = day + '-' + i|string %}
+                                {% set count = github_contributions.data.get(contribution_key, 0) %}
+                                <div 
+                                    class="w-[10px] h-[10px] flex-shrink-0 rounded-sm
+                                    {% if count == 0 %}bg-gray-100 dark:bg-gray-800
+                                    {% elif count < 2 %}bg-blue-100 dark:bg-blue-950
+                                    {% elif count < 4 %}bg-blue-200 dark:bg-blue-900
+                                    {% elif count < 6 %}bg-blue-300 dark:bg-blue-800
+                                    {% elif count < 8 %}bg-blue-400 dark:bg-blue-700
+                                    {% else %}bg-blue-500 dark:bg-blue-600
+                                    {% endif %}
+                                    hover:ring-2 hover:ring-blue-500 transition-all"
+                                    title="{{ count }} contributions on {{ day }}"
+                                ></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <span>More</span>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <!-- Overlay Container -->
-    <div id="overlay-container"></div>
+            <!-- Legend -->
+            <div class="flex items-center justify-end text-xs text-gray-600 dark:text-gray-400 space-x-2 mt-2">
+                <span>Less</span>
+                <div class="flex gap-[3px]">
+                    <div class="w-[10px] h-[10px] rounded-sm bg-gray-100 dark:bg-gray-800"></div>
+                    <div class="w-[10px] h-[10px] rounded-sm bg-blue-100 dark:bg-blue-950"></div>
+                    <div class="w-[10px] h-[10px] rounded-sm bg-blue-200 dark:bg-blue-900"></div>
+                    <div class="w-[10px] h-[10px] rounded-sm bg-blue-300 dark:bg-blue-800"></div>
+                    <div class="w-[10px] h-[10px] rounded-sm bg-blue-500 dark:bg-blue-600"></div>
+                </div>
+                <span>More</span>
+            </div>
+        </div>
+    </section>
+</main>
 
-    <!-- Add this before the closing </body> tag -->
-    <elevenlabs-convai agent-id="8hsRyvFj8jTenuDdqsmq"></elevenlabs-convai>
-    <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+<!-- Overlay Container -->
+<div id="overlay-container"></div>
+
+<!-- Add this before the closing </body> tag -->
+<elevenlabs-convai agent-id="8hsRyvFj8jTenuDdqsmq"></elevenlabs-convai>
+<script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
 {% endblock %}
 
 {% block scripts %}

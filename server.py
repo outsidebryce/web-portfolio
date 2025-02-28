@@ -3,11 +3,12 @@ from flask_compress import Compress
 from cachetools import TTLCache
 from datetime import datetime, timedelta
 import os
-from api_config import get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post
+from api_config import get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post, get_ghost_page, get_all_ghost_posts
 import requests
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 import logging
+from jinja2 import TemplateNotFound
 
 load_dotenv()  # Add this near the top of server.py, before the GITHUB_TOKEN is used
 
@@ -43,6 +44,7 @@ TECH_STACK = [
 # Add this to your configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 GITHUB_USERNAME = 'outsidebryce'
+GHOST_API_URL = "https://bryce-thompson.ghost.io/ghost/api/content/posts/"
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -112,23 +114,29 @@ def get_github_contributions(token):
 
 @app.route('/')
 def home():
-    ghost_posts = []
-    case_studies = []
-    playbook_items = []
-    tech_stack_items = []
-    
     try:
-        # Get posts for each tag
-        ghost_posts = get_ghost_posts(limit=5, tag='news')
+        # Get all posts in one call
+        all_posts = get_all_ghost_posts()
+        
+        # Filter posts by tag
+        ghost_posts = [p for p in all_posts if any(t.get('slug') == 'news' for t in p.get('tags', []))][:5]
+        playbook_items = [p for p in all_posts if any(t.get('slug') == 'playbook' for t in p.get('tags', []))]
+        tech_stack_items = [p for p in all_posts if any(t.get('slug') == 'tech-stack' for t in p.get('tags', []))]
+        
+        # Get case studies separately since they're from a different source
         case_studies = get_case_studies(limit=6)
-        playbook_items = get_ghost_posts(limit=None, tag='playbook')
-        tech_stack_items = get_ghost_posts(limit=None, tag='tech-stack')
+        
     except Exception as e:
         print(f"❌ Error fetching posts: {str(e)}")
+        ghost_posts = []
+        case_studies = []
+        playbook_items = []
+        tech_stack_items = []
     
     github_contributions = get_github_contributions(GITHUB_TOKEN)
     
-    return render_template('index.html',
+    return render_template('index.html', 
+                         current_page='home',
                          ghost_posts=ghost_posts,
                          case_studies=case_studies,
                          playbook_items=playbook_items,
@@ -184,24 +192,37 @@ def case_study_post(slug):
 
 @app.route('/api/case-studies/<slug>')
 def get_case_study_content(slug):
-    """API endpoint for fetching case study content"""
+    """API endpoint for fetching case study content with caching"""
+    cache_key = f"case_study_{slug}"
+    if cache_key in cache:
+        return jsonify(cache[cache_key])
+    
     try:
         post = get_ghost_post(slug)
         if not post:
             return abort(404)
         
-        return jsonify({
+        response_data = {
             'title': post['title'],
             'html': post['html'],
             'feature_image': post.get('feature_image'),
-            'reading_time': post.get('reading_time', 0),  # Default to 0 if missing
-            'published_at': post.get('published_at', ''),  # Default to empty string if missing
+            'reading_time': post.get('reading_time', 0),
+            'published_at': post.get('published_at', ''),
             'next_post': get_next_post(post, tag='case-studies'),
             'prev_post': get_prev_post(post, tag='case-studies')
-        })
+        }
+        
+        # Cache the full response
+        cache[cache_key] = response_data
+        return jsonify(response_data)
+        
     except Exception as e:
         print(f"Error processing case study: {e}")
         return abort(500)
+
+@app.route('/blog')
+def blog():
+    return render_template('blog.html', current_page='blog')
 
 @app.route('/blog/<slug>')
 def blog_post(slug):
@@ -209,7 +230,7 @@ def blog_post(slug):
     post = get_ghost_post(slug)
     if not post:
         return abort(404)
-    return render_template('blog_post.html', post=post)
+    return render_template('blog_post.html', current_page='blog', post=post)
 
 @app.route('/api/posts/<slug>')
 def get_post_content(slug):
@@ -315,6 +336,44 @@ def add_cache_headers(response):
         expires = datetime.now() + timedelta(seconds=2592000)
         response.headers['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
     return response
+
+@app.route('/ai-chat')
+def ai_chat():
+    return render_template('ai-chat.html')
+
+@app.route('/<path>')
+def dynamic_page(path):
+    """Handle dynamic routing for pages like blog, about, contact"""
+    try:
+        # First try to get page as a Ghost page
+        page = get_ghost_page(path)
+        if page:
+            return render_template('page.html', 
+                                page=page, 
+                                current_page=path)
+        
+        # If not found in Ghost, check if we have a static template
+        if path in ['blog', 'about', 'contact']:
+            # For blog, fetch posts
+            if path == 'blog':
+                ghost_posts = get_ghost_posts(limit=10)
+                return render_template('blog.html', 
+                                    posts=ghost_posts, 
+                                    current_page='blog')
+            
+            # For about and contact, use static templates
+            try:
+                return render_template(f'{path}.html', 
+                                    current_page=path)
+            except TemplateNotFound:
+                return abort(404)
+        
+        # If path doesn't match any content, 404
+        return abort(404)
+        
+    except Exception as e:
+        print(f"Error loading page {path}: {e}")
+        return abort(500)
 
 if __name__ == '__main__':
     # Use production server (gunicorn) in production
