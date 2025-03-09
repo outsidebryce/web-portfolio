@@ -1,0 +1,46 @@
+<!-- About Content -->
+<div class="max-w-4xl mx-auto">
+    <!-- Bio Section -->
+    <section class="mb-12">
+        <h1 class="text-4xl font-bold mb-6 dark:text-white">About Me</h1>
+        <div class="prose dark:prose-invert max-w-none">
+            <p class="text-lg">
+                I'm a lead product designer based in Austin, Texas, specializing in creating innovative digital experiences 
+                for health, marketplace, and B2B companies.
+            </p>
+            <!-- Add more bio content as needed -->
+        </div>
+    </section>
+
+    <!-- Quick Facts -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-4 dark:text-white">Quick Facts</h2>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <ul class="space-y-3">
+                <li>🎯 10+ years of product design experience</li>
+                <li>🏢 Led design teams at various tech companies</li>
+                <li>🌟 Shipped features used by millions</li>
+                <li>🎓 Design systems and UX architecture expert</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Life Beyond Design -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-4 dark:text-white">Life Beyond Design</h2>
+        <div class="photo-grid">
+            {% if photos %}
+                {% for photo in photos %}
+                <div class="photo-item">
+                    <img src="{{ photo.baseUrl }}" 
+                         alt="{{ photo.filename }}"
+                         loading="lazy"
+                         class="rounded-lg shadow-md">
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-600 dark:text-gray-400">No photos available at the moment.</p>
+            {% endif %}
+        </div>
+    </section>
+</div> 

@@ -1,22 +1,18 @@
 from flask import Flask, render_template, send_from_directory, request, redirect, session, url_for, abort, jsonify
 from flask_compress import Compress
-from cachetools import TTLCache
 from datetime import datetime, timedelta
 import os
-from api_config import get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post, get_ghost_page, get_all_ghost_posts
+from api_config import get_ghost_posts, get_case_studies, get_ghost_post, get_next_post, get_prev_post, get_ghost_page, get_all_ghost_posts, clear_cache
 import requests
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 import logging
 from jinja2 import TemplateNotFound
 
-load_dotenv()  # Add this near the top of server.py, before the GITHUB_TOKEN is used
+load_dotenv()
 
 app = Flask(__name__)
 Compress(app)
-
-# Cache configuration
-cache = TTLCache(maxsize=100, ttl=3600)  # Cache for 1 hour
 
 # Sample data
 PLAYBOOK = [
@@ -52,6 +48,13 @@ def get_github_contributions(token):
     # Calculate date range - ensure we get a full year including today
     end_date = datetime.now()
     start_date = end_date - timedelta(days=364)  # Change from 365 to 364 to include today
+    
+    # Generate list of months for the contribution graph
+    months = []
+    current_date = end_date
+    for _ in range(13):  # 13 months to account for partial months
+        months.append(current_date.strftime('%b'))
+        current_date = current_date.replace(day=1) - timedelta(days=1)  # Go to last day of previous month
     
     query = """
     query($username:String!, $from:DateTime!, $to:DateTime!) {
@@ -93,7 +96,9 @@ def get_github_contributions(token):
         calendar = data['data']['user']['contributionsCollection']['contributionCalendar']
         contributions = {
             'total': calendar['totalContributions'],
-            'data': {}
+            'data': {},
+            'dates': {},
+            'months': months  # Add months to the response
         }
         
         # Process the contribution data
@@ -105,6 +110,8 @@ def get_github_contributions(token):
                 weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday()]
                 key = f"{weekday}-{week_number}"
                 contributions['data'][key] = day['contributionCount']
+                # Add formatted date
+                contributions['dates'][key] = date.strftime("%B %d, %Y")
         
         logging.debug(f"Processed contributions: {contributions}")
         return contributions
@@ -115,11 +122,15 @@ def get_github_contributions(token):
 @app.route('/')
 def home():
     try:
-        # Get all posts in one call
-        all_posts = get_all_ghost_posts()
+        # Get all posts in one call, force refresh if requested
+        force_refresh = request.args.get('refresh') == 'true'
+        all_posts = get_all_ghost_posts(force_refresh=force_refresh)
         
-        # Filter posts by tag
-        ghost_posts = [p for p in all_posts if any(t.get('slug') == 'news' for t in p.get('tags', []))][:5]
+        # Filter posts by tag and sort by published date
+        news_posts = [p for p in all_posts if any(t.get('slug') == 'news' for t in p.get('tags', []))]
+        news_posts.sort(key=lambda x: x.get('published_at', ''), reverse=True)  # Sort by date, newest first
+        ghost_posts = news_posts[:3]  # Limit to 3 most recent posts
+        
         playbook_items = [p for p in all_posts if any(t.get('slug') == 'playbook' for t in p.get('tags', []))]
         tech_stack_items = [p for p in all_posts if any(t.get('slug') == 'tech-stack' for t in p.get('tags', []))]
         
@@ -127,7 +138,7 @@ def home():
         case_studies = get_case_studies(limit=6)
         
     except Exception as e:
-        print(f"❌ Error fetching posts: {str(e)}")
+        app.logger.error(f"❌ Error fetching posts: {str(e)}")
         ghost_posts = []
         case_studies = []
         playbook_items = []
@@ -142,6 +153,17 @@ def home():
                          playbook_items=playbook_items,
                          tech_stack_items=tech_stack_items,
                          github_contributions=github_contributions)
+
+@app.route('/api/refresh-cache')
+def refresh_cache():
+    """Force refresh the Ghost posts cache"""
+    try:
+        clear_cache()
+        get_all_ghost_posts(force_refresh=True)
+        return jsonify({'status': 'success', 'message': 'Cache refreshed successfully'})
+    except Exception as e:
+        app.logger.error(f"Error refreshing cache: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/debug/linkedin')
 def debug_linkedin():
@@ -192,13 +214,10 @@ def case_study_post(slug):
 
 @app.route('/api/case-studies/<slug>')
 def get_case_study_content(slug):
-    """API endpoint for fetching case study content with caching"""
-    cache_key = f"case_study_{slug}"
-    if cache_key in cache:
-        return jsonify(cache[cache_key])
-    
+    """API endpoint for fetching case study content"""
     try:
-        post = get_ghost_post(slug)
+        force_refresh = request.args.get('refresh') == 'true'
+        post = get_ghost_post(slug) if not force_refresh else get_ghost_post(slug, force_refresh=True)
         if not post:
             return abort(404)
         
@@ -212,12 +231,14 @@ def get_case_study_content(slug):
             'prev_post': get_prev_post(post, tag='case-studies')
         }
         
-        # Cache the full response
-        cache[cache_key] = response_data
-        return jsonify(response_data)
+        response = jsonify(response_data)
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
         
     except Exception as e:
-        print(f"Error processing case study: {e}")
+        app.logger.error(f"Error processing case study: {e}")
         return abort(500)
 
 @app.route('/blog')
@@ -236,21 +257,29 @@ def blog_post(slug):
 def get_post_content(slug):
     """API endpoint for fetching post content"""
     try:
-        post = get_ghost_post(slug)
+        force_refresh = request.args.get('refresh') == 'true'
+        post = get_ghost_post(slug) if not force_refresh else get_ghost_post(slug, force_refresh=True)
         if not post:
             return abort(404)
         
-        return jsonify({
+        response_data = {
             'title': post['title'],
             'html': post['html'],
             'feature_image': post.get('feature_image'),
-            'reading_time': post.get('reading_time', 0),  # Default to 0 if missing
-            'published_at': post.get('published_at', ''),  # Default to empty string if missing
+            'reading_time': post.get('reading_time', 0),
+            'published_at': post.get('published_at', ''),
             'next_post': get_next_post(post),
             'prev_post': get_prev_post(post)
-        })
+        }
+        
+        response = jsonify(response_data)
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+        
     except Exception as e:
-        print(f"Error processing post: {e}")
+        app.logger.error(f"Error processing post: {e}")
         return abort(500)
 
 @app.route('/api/chat', methods=['POST'])

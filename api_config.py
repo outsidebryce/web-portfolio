@@ -5,15 +5,21 @@ from requests.packages.urllib3.util.retry import Retry
 import time
 import os
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
 # Ghost API Configuration
 GHOST_URL = os.getenv('GHOST_URL')
 GHOST_KEY = os.getenv('GHOST_CONTENT_API_KEY')
+IS_PRODUCTION = os.getenv('FLASK_ENV') == 'production'
 
-# Increase cache duration to 1 hour
-cache = TTLCache(maxsize=100, ttl=3600)
+# Configure logging
+logging.basicConfig(level=logging.DEBUG if not IS_PRODUCTION else logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Single cache instance with shorter TTL
+cache = TTLCache(maxsize=100, ttl=300)  # 5 minutes for all environments
 
 # Configure retry strategy
 retry_strategy = Retry(
@@ -27,14 +33,25 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 session.mount("https://", adapter)
 session.mount("http://", adapter)
 
-def get_all_ghost_posts():
+def clear_cache():
+    """Clear the entire cache"""
+    cache.clear()
+    logger.debug("Cache cleared")
+
+def get_all_ghost_posts(force_refresh=False):
     """Get all posts from Ghost CMS with a single API call"""
     cache_key = "all_posts"
-    if cache_key in cache:
+    
+    if force_refresh:
+        logger.debug("Force refresh requested, clearing cache")
+        if cache_key in cache:
+            del cache[cache_key]
+    elif cache_key in cache:
+        logger.debug("Returning cached posts")
         return cache[cache_key]
         
     if not GHOST_URL or not GHOST_KEY:
-        print("❌ Missing GHOST_URL or GHOST_KEY environment variables")
+        logger.error("❌ Missing GHOST_URL or GHOST_KEY environment variables")
         return []
         
     # Use the URL structure that we know works
@@ -47,19 +64,19 @@ def get_all_ghost_posts():
     }
     
     try:
-        print(f"🔄 Fetching posts from: {api_url}")
+        logger.debug(f"🔄 Fetching posts from: {api_url}")
         response = session.get(api_url, params=params)
-        print(f"🔄 Full URL with params: {response.url}")
-        print(f"🔄 API Response Status: {response.status_code}")
+        logger.debug(f"🔄 Full URL with params: {response.url}")
+        logger.debug(f"🔄 API Response Status: {response.status_code}")
         
         if response.status_code != 200:
-            print(f"❌ API Error Response: {response.text}")
+            logger.error(f"❌ API Error Response: {response.text}")
             return []
             
         response.raise_for_status()
         data = response.json()
         posts = data.get('posts', [])
-        print(f"✅ Successfully fetched {len(posts)} posts")
+        logger.info(f"✅ Successfully fetched {len(posts)} posts")
         
         for post in posts:
             if post.get('feature_image'):
@@ -68,13 +85,13 @@ def get_all_ghost_posts():
         cache[cache_key] = posts
         return posts
     except requests.exceptions.RequestException as e:
-        print(f"❌ Error fetching Ghost posts: {str(e)}")
-        print(f"❌ Full error details: {e.__class__.__name__}")
+        logger.error(f"❌ Error fetching Ghost posts: {str(e)}")
+        logger.error(f"❌ Full error details: {e.__class__.__name__}")
         return cache.get(cache_key, [])
 
-def get_ghost_posts(limit=None, tag=None):
+def get_ghost_posts(limit=None, tag=None, force_refresh=False):
     """Filter posts by tag from the cached collection"""
-    all_posts = get_all_ghost_posts()
+    all_posts = get_all_ghost_posts(force_refresh=force_refresh)
     
     if tag:
         filtered_posts = [
@@ -88,9 +105,9 @@ def get_ghost_posts(limit=None, tag=None):
         return filtered_posts[:limit]
     return filtered_posts
 
-def get_ghost_post(slug):
+def get_ghost_post(slug, force_refresh=False):
     """Get a single post from the cached collection"""
-    all_posts = get_all_ghost_posts()
+    all_posts = get_all_ghost_posts(force_refresh=force_refresh)
     for post in all_posts:
         if post['slug'] == slug:
             return post

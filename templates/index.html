@@ -5,29 +5,52 @@
 {% block content %}
 {% include "components/header.html" %}
 
+<style>
+.avatar-image {
+    width: 100px;
+    height: 100px;
+    margin: 0px 20px 20px 0;
+}
+
+.description-text {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .avatar-image {
+    width: 100px;
+    height: 100px;
+    margin: 0 0 20px 0;
+}
+.description-text {
+    font-size: 1rem;
+}
+}
+</style>
+
 <!-- Homepage Intro -->
 <div class="text-center md:text-left pt-[100px]">
     <div class="relative inline-block md:block">
         
     </div>
-    <h1 class="text-[2rem] md:text-[4rem] leading-tight mb-4">Hello, I'm Bryce</h1>
-    <p class="text-gray-600 dark:text-gray-400 max-w-2xl text-[0.9rem] md:mx-0 mx-auto">
-        I'm the lead product designer of Nova, a studio based in Austin, TX helping health, marketplace, or B2B companies ship innovative experiences. 
-    </p>
+   
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <img 
+            src="{{ url_for('static', filename='images/bryce-thompson.webp') }}"
+            alt="Bryce Thompson"
+            class="avatar-image rounded-full object-cover"
+        />
+        <p class="text-gray-900 dark:text-gray-100 max-w-2xl text-[1.2rem] md:mx-0 mx-auto description-text">
+            I'm Bryce Thompson, an Experience Director based in Austin, Texas, helping teams craft seamless customer journeys and bring visionary products to life.
+        </p>
+    </div>
 </div>
 
 <main class="mt-16">
     <section class="mb-16">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl">Selected Cases</h2>
-            <a 
-                href="https://dribbble.com/yourusername" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
-            >
-                View All
-            </a>
+            <h2 class="text-xl">Selected Work</h2>
+            
         </div>
         {% include "components/projects.html" %}
     </section>
@@ -39,14 +62,7 @@
     <section class="mb-16">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-xl">Recent Writing</h2>
-            <a 
-                href="{{ ghost_posts[0].url.split('/')[2] }}"
-                target="_blank" 
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-800"
-            >
-                View All →
-            </a>
+            
         </div>
         <div class="space-y-4">
             {% for post in ghost_posts %}
@@ -127,12 +143,12 @@
             <!-- Overflow wrapper around entire chart -->
             <div class="overflow-x-auto">
                 <!-- Fixed-width container matching 52 weeks of contributions -->
-                <div class="w-[574px]"> <!-- 52 weeks * (10px square + 3px gap) + 40px label = 574px -->
+                <div style="width: 825px"> <!-- 52 weeks * (10px square + 3px gap) + 40px label = 574px -->
                     <!-- Months header -->
                     <div class="pl-10">
-                        <div class="flex">
-                            {% for month in ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'] %}
-                            <div class="text-xs text-gray-600 dark:text-gray-400 text-left" style="width: 61px">{{ month }}</div>
+                        <div class="flex w-full justify-between">
+                            {% for month in github_contributions.months %}
+                            <div class="text-xs text-gray-600 dark:text-gray-400 text-left flex-1">{{ month }}</div>
                             {% endfor %}
                         </div>
                     </div>
@@ -146,8 +162,9 @@
                                 {% for i in range(52) %}
                                 {% set contribution_key = day + '-' + i|string %}
                                 {% set count = github_contributions.data.get(contribution_key, 0) %}
+                                {% set date = github_contributions.dates.get(contribution_key, '') %}
                                 <div 
-                                    class="w-[10px] h-[10px] flex-shrink-0 rounded-sm
+                                    class="w-[12px] h-[10px] flex-shrink-0 rounded-sm
                                     {% if count == 0 %}bg-gray-100 dark:bg-gray-800
                                     {% elif count < 2 %}bg-blue-100 dark:bg-blue-950
                                     {% elif count < 4 %}bg-blue-200 dark:bg-blue-900
@@ -156,7 +173,7 @@
                                     {% else %}bg-blue-500 dark:bg-blue-600
                                     {% endif %}
                                     hover:ring-2 hover:ring-blue-500 transition-all"
-                                    title="{{ count }} contributions on {{ day }}"
+                                    title="{{ count }} contribution{% if count != 1 %}s{% endif %} on {{ date }}"
                                 ></div>
                                 {% endfor %}
                             </div>
@@ -182,16 +199,25 @@
     </section>
 </main>
 
+<!-- Dynamic Content Container -->
+<div id="dynamic-content-container" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 hidden opacity-0 transition-opacity duration-300">
+    <div class="relative w-full h-full overflow-y-auto">
+        <button id="close-dynamic-content" class="fixed top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 z-50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div id="dynamic-content" class="p-6 max-w-4xl mx-auto">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
 <!-- Overlay Container -->
 <div id="overlay-container"></div>
 
 <!-- Add this before the closing </body> tag -->
-<elevenlabs-convai agent-id="8hsRyvFj8jTenuDdqsmq"></elevenlabs-convai>
-<script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
-{% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/blog.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('skillsRadar');

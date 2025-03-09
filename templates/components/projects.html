@@ -17,11 +17,11 @@
                 </div>
                 {% endif %}
                 <div class="p-6 flex flex-col flex-grow">
-                    <h3 class="text-[1.75rem] md:text-2xl mb-2">{{ case_study.title }}</h3>
-                    <p class="text-gray-600 mb-4 flex-grow text-[0.9rem]">{{ case_study.excerpt }}</p>
+                    <h3 class="text-[1.75rem] md:text-2xl mb-2 dark:text-white">{{ case_study.title }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 flex-grow text-[0.9rem]">{{ case_study.excerpt }}</p>
                     <a 
                         href="#"
-                        class="case-study-link text-blue-600 hover:text-blue-800 mt-auto text-lg"
+                        class="case-study-link text-blue-600 hover:text-blue-800 dark:text-white dark:hover:text-blue-400 mt-auto text-lg"
                         data-slug="{{ case_study.slug }}"
                     >
                         View Case Study →
@@ -92,7 +92,22 @@
         }
     }
     
+    /* Pagination Styles */
+    .swiper-pagination-bullet {
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 1;
+    }
+    
     .swiper-pagination-bullet-active {
+        background: #fff;
+    }
+    
+    /* Light mode pagination */
+    :root:not(.dark) .swiper-pagination-bullet {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    :root:not(.dark) .swiper-pagination-bullet-active {
         background: #2563eb;
     }
 </style> 
