@@ -1,0 +1,50 @@
+/* Weather Schedule Overlay Styles */
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Chart container styles */
+.chart-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    min-height: 200px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    #weather-schedule-overlay .absolute {
+        width: 100%;
+    }
+    
+    .chart-container {
+        min-height: 250px;
+    }
+}
+
+/* Dark mode adjustments */
+.dark .chart-container {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Cal.com widget container */
+.cal-wrapper {
+    height: calc(100vh - 70px); /* Account for header height */
+    overflow: hidden;
+}
+
+/* Weather icon styles */
+.weather-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+} 

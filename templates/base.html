@@ -47,6 +47,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:wght@400&family=Inter:wght@400&display=swap">
     
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/weather-schedule.css') }}" rel="stylesheet">
     
     <!-- Vanta.js Dependencies -->
     <script type="module" src="{{ url_for('static', filename='js/vanta.waves.min.js') }}" defer></script>
@@ -85,11 +86,27 @@
             font-size: .9rem;
             letter-spacing: 0.5px;
             color: rgba(0,0,0,0.9);
-            border: 1px solid rgba(0,0,0,.1);
-            border-radius: 100px;
-            padding: 3px 10px;
+            transition: all 0.2s ease;
+            cursor: pointer;
             min-width: 110px;
             text-align: center;
+            position: relative;
+            display: block;
+        }
+
+        #chicago-clock:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .dark #chicago-clock {
+            color: white !important;
+            border-color: rgba(255,255,255,.1) !important;
+        }
+
+        .dark #chicago-clock:hover {
+            background: rgba(255,255,255,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         #theme-toggle {
@@ -127,11 +144,6 @@
         
         .dark #vanta-background {
             background-color: #000;
-        }
-
-        .dark #chicago-clock {
-            color: white !important;
-            border-color: rgba(255,255,255,.1) !important;
         }
 
         .dark article.bg-white {
@@ -243,15 +255,24 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css">
+    <!-- Remove Cal.com script -->
     {% block head %}{% endblock %}
 </head>
 <body class="dark:bg-transparent">
     <div id="vanta-background"></div>
     <div class="md:w-1/2 bg-white dark:bg-transparent">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:py-12 relative">
             <div class="flex items-center space-x-2 absolute right-4 md:right-[30px] md:top-[48px]">
-               
-                <div id="chicago-clock" class="text-gray-500 dark:text-white">&nbsp;</div>
+                <button id="chicago-clock" class="group flex items-center space-x-2 text-gray-500 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-full border border-gray-200 dark:border-gray-700">
+                    <span class="px-3 py-1">&nbsp;</span>
+                    <svg class="w-4 h-4 mr-2 opacity-60 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
                 <button id="theme-toggle" class="p-2 pl-0 text-gray-500 dark:text-gray-400">
                     <!-- Sun icon -->
                     <svg id="light-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,7 +293,9 @@
     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/weather-schedule.js') }}"></script>
     {% block scripts %}{% endblock %}
     <script>
         // Chicago Clock
